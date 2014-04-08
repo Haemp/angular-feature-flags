@@ -7,7 +7,7 @@
         beforeEach(module('feature-flags', function($provide) {
             return $provide.decorator('FlagsService', function($delegate) {
                 $delegate.fetch = angular.noop;
-                
+
                 return $delegate;
             });
         }));
@@ -35,7 +35,7 @@
                     spyOn(FlagsService, 'isOn').andReturn(false);
                     $scope.$digest();
                 }));
-                
+
                 it('should remove the element from the dom', function() {
                     expect(container.children().length).toBe(0);
                 });
