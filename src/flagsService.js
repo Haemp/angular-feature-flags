@@ -88,7 +88,7 @@ angular.module("feature-flags", [])
                   }
                }
             });
-            
+
          }
       };
    }])
@@ -103,7 +103,8 @@ angular.module("feature-flags", [])
          fetch = function() {
             return $http.get(FLAGS_URL)
                .success(function(flags) {
-                  flags.forEach(function(flag) {
+                  if( !flags )  return;
+                  angular.forEach(flags, function(flag){
                      flag.active = isOn(flag.key);
                   });
                   angular.copy(flags, cache);
