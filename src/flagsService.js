@@ -35,11 +35,20 @@ angular.module("feature-flags", [])
          };
       });
    })
-   .run(function($rootScope, FlagsService) {
+   .run(function($rootScope, FlagsService, FLAGS_URL) {
       $rootScope.featureFlagEnable = FlagsService.enable;
       $rootScope.featureFlagDisable = FlagsService.disable;
 
-      FlagsService.fetch();
+      // If user configured flags
+      // in config we go ahead and
+      // fetch on run. Otherwise
+      // we wait for the user to
+      // trigger it manually.
+      // U: Flags url is dependant
+      // on variables not accessible
+      // yet
+      if( FLAGS_URL )
+         FlagsService.fetch();
    })
    .directive('featureFlag', ['FlagsService', '$animate', function(FlagsService, $animate) {
       return {
@@ -100,7 +109,13 @@ angular.module("feature-flags", [])
             return cache;
          },
 
-         fetch = function() {
+         fetch = function( url ) {
+
+            // enables manual fetching 
+            if(!FLAGS_URL){
+               FLAGS_URL = url;
+            }
+
             return $http.get(FLAGS_URL)
                .success(function(flags) {
                   if( !flags )  return;
