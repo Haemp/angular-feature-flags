@@ -22,19 +22,28 @@ angular.module("FeatureFlags", [])
       self.getFlags = function(url){
 
          $http.get(url || FLAGS_URL).then(function( resp ){
+
+            if( resp.status > 300 ){ // incase a 404 call gets in here
+               self._onErrorGetFlags(resp)
+            }
+
             self.flags = resp.data;
 
             self._save()
-         }, function(){
-            console.log('No feature flags');
+         }, self._onErrorGetFlags);
+      }
 
-            // load feature flags from the local storage
-            self._load();
-         });
+      self._onErrorGetFlags = function(resp){
+         console.log('No feature flags fetched');
+         self._load();
       }
 
       self.isOn = function( index ){
          return !!(self.flags[index]);
+      };
+
+      self.isOff = function( index ){
+         return !(self.flags[index]);
       };
 
       self._save = function(){
@@ -89,6 +98,60 @@ angular.module("FeatureFlags", [])
 
             $scope.$watch(function() {
                return FlagsModel.isOn(attrs.featureFlag);
+            }, function featureFlagWatchAction(value, oldValue) {
+
+               // if the feature is enabled
+               if (value) {
+                  if (!childScope) {
+                     childScope = $scope.$new();
+                     $transclude(childScope, function(clone) {
+                        clone[clone.length++] = document.createComment(
+                           ' end featureFlag: ' + $attr.featureFlag + ' '
+                        );
+                        // Note: We only need the first/last node of the cloned nodes.
+                        // However, we need to keep the reference to the jqlite wrapper as it might be changed later
+                        // by a directive with templateUrl when it's template arrives.
+                        block = {
+                           clone: clone
+                        };
+                        $animate.enter(clone, $element.parent(), $element);
+                     });
+                  }
+               } else {
+                  if (previousElements) {
+                     previousElements.remove();
+                     previousElements = null;
+                  }
+                  if (childScope) {
+                     childScope.$destroy();
+                     childScope = null;
+                  }
+                  if (block) {
+                     previousElements = getBlockElements(block.clone);
+                     $animate.leave(previousElements, function() {
+                        previousElements = null;
+                     });
+                     block = null;
+                  }
+               }
+            });
+
+         }
+      };
+   }])
+
+   .directive('featureFlagOff', ['FlagsModel', '$animate', function(FlagsModel, $animate) {
+      return {
+         transclude: 'element',
+         priority: 600,
+         terminal: true,
+         restrict: 'A',
+         $$tlb: true,
+         link: function($scope, $element, $attr, ctrl, $transclude) {
+            var block, childScope, previousElements;
+
+            $scope.$watch(function() {
+               return FlagsModel.isOff(attrs.featureFlag);
             }, function featureFlagWatchAction(value, oldValue) {
 
                // if the feature is enabled
