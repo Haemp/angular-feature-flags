@@ -68,7 +68,7 @@ angular.module("FeatureFlags", [])
     * this will work, otherwise we rely on the user triggering
     * it.
     */
-   .run(function(FlagsService, FLAGS_URL) {
+   .run(function(FeatureFlags, FLAGS_URL) {
 
       // If user configured flags
       // in config we go ahead and
@@ -79,7 +79,7 @@ angular.module("FeatureFlags", [])
       // on variables not accessible
       // yet
       if( FLAGS_URL )
-         FlagsService.fetch();
+         FeatureFlags.fetch();
    })
 
    /**
@@ -139,8 +139,7 @@ angular.module("FeatureFlags", [])
          }
       };
    }])
-
-   .directive('featureFlagOff', ['FlagsModel', '$animate', function(FlagsModel, $animate) {
+ .directive('featureFlagOff', ['FlagsModel', '$animate', function(FlagsModel, $animate) {
       return {
          transclude: 'element',
          priority: 600,
@@ -194,6 +193,7 @@ angular.module("FeatureFlags", [])
       };
    }])
 
+  
 
 
    /**
