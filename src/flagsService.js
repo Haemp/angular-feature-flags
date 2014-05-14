@@ -47,20 +47,6 @@ angular.module("FeatureFlags", [])
          return false;
       };
 
-      // loops through all the feature flags
-      // and determines if the current feature
-      // is on or not
-      // TODO: Could be improved by having
-      // flags['flagKey']
-      self.isOn = function( featureName ){
-         var flag;
-         for (var i = 0; i < self.flags.length; i++) {
-            flag = self.flags[i];
-            if( flag.key == featureName ) return true;
-         }
-         return false;
-      };
-
       self._save = function(){
          if( self.flags ){
             localStorage.setItem(LOCALSTORAGE_NAME, JSON.stringify(self.flags) );
