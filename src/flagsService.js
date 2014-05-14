@@ -153,7 +153,7 @@ angular.module("FeatureFlags", [])
 	            var block, childScope, previousElements;
 
 	            $scope.$watch(function() {
-	               return FlagsModel.isOn(attrs.featureFlagOff);
+	               return FlagsModel.isOn($attr.featureFlagOff);
 	            }, function featureFlagWatchAction(value, oldValue) {
 
 	               // if the feature is enabled
